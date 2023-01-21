@@ -1,10 +1,9 @@
-# Parcer for Auto.ru magazine news. Return file with articles for keyword
-# for exapmple, use key word Toyota to get articles about Toyota cars
+# Parcer for Auto.ru magazine news (https://mag.auto.ru/). Return file with articles for keyword and data (all article after that date)
+# for exapmple, use key word BMW to get articles, where BMW was mentioned
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
-from requests import get
-from csv import DictWriter
+import csv
+from datetime import date
 
 #suppress SSL sertificate error
 from urllib3.exceptions import InsecureRequestWarning
@@ -14,8 +13,17 @@ disable_warnings(InsecureRequestWarning)
 url_base="https://mag.auto.ru/theme/news/?page="
 curr_page = 1
 
-search_str = input("key word for search: ")
-Next_page = True
+search_str = input("ключевое слово для поиска: ")
+date_str = input("самая ранняя дата YYYY+MM+DD: ")
+try:
+    dt_startdate = date.fromisoformat(date_str)
+except:
+    print("неверный формат даты, выбрана 2023-01-01 по умолчанию")
+    date_str = '2023-01-01'
+    dt_startdate = date.fromisoformat(date_str)
+#print(dt_startdate)
+
+next_page = True
 headers = {
 "Accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
 "Accept-Encoding" : "gzip, deflate, br",
@@ -35,12 +43,75 @@ headers = {
 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 }
 
-#while Next_page:
-url = f'{url_base}{curr_page}'
-print(url)
-req_result = requests.get(url, verify=False, headers=headers)
-soup = BeautifulSoup(req_result.text, 'html.parser')
-print(soup)
-#find Class in soup
-span = soup.find('span', class_='register')
-print(span)
+#open CSV file
+f = open('Auto_articles.csv', 'w', encoding='utf-8-sig', newline='') #, encoding="utf-8'
+writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC, delimiter=';')
+file_row = ["Заголовок", "Дата", "Ссылка", "Начало статьи"]
+writer.writerow(file_row)
+
+while next_page:
+    url = f'{url_base}{curr_page}'
+    print(url)
+    req_result = requests.get(url, verify=False, headers=headers)
+    req_result.encoding = 'utf8'
+    soup = BeautifulSoup(req_result.text, 'html.parser')
+    #print(soup)
+    print(f'Обработка страницы {curr_page}')
+    #Find articles in soup
+    articles = soup.find("ul", class_="MaterialsList__list")
+    #all articles on the page
+    for article in articles:
+        meta_desc = article.find("div", class_="BlockTypePost__descriptionMeta")
+        #time
+        time_tag = meta_desc.find("time", class_="DateTime DateTime_size_l DateTime_color_gray BlockTypePost__metaItem")
+        dt_str = time_tag.get("datetime")
+        dt_list = dt_str.split("T")
+        dt_date = date.fromisoformat(dt_list[0])
+        if dt_date < dt_startdate:
+            next_page = False
+            break
+        #title
+        title = article.find("h3", class_="BlockTypePost__title")
+        #url
+        art_url = title.a.get("href")
+        #take article
+        req_art = requests.get(art_url, verify=False, headers=headers)
+        req_art.encoding = 'utf8'
+        art_soup = BeautifulSoup(req_art.text, 'html.parser')
+        #print(soup)
+        file_row[0] = title.text.strip()
+        print(file_row[0])
+        file_row[1] = dt_list[0]
+        file_row[2] = art_url
+        print(file_row[2])
+        art_content = art_soup.find_all("div", class_="MarkupText TextBlock")
+        if len(art_content) != 0:     #if article content exists
+            content_txt = art_content[0].text.strip()
+            #print("content_txt", content_txt)
+            if len(content_txt) < 5:   #if first element is empty
+                content_txt = art_content[1].text.strip()
+                #print("content_txt", content_txt)
+            file_row[3] = content_txt[0:256]
+        else:   #if no article content, check video comments
+            art_content = art_soup.find("figcaption", class_="MarkupText FigureCaption VideoBlock__description")
+            if art_content != None:
+                file_row[3] = art_content.text.strip()[0:256]
+            else:
+                file_row[3] = ""
+        file_row[3] = file_row[3].replace('\n',' ')
+        if file_row[0].find(search_str) > 0 or file_row[3].find(search_str) > 0:
+            writer.writerow(file_row)
+        #print(art_text)
+
+    #Check if last page
+    #find Class in soup
+    span = soup.find('span', class_='ControlGroup ControlGroup_responsive_no ControlGroup_size_s')
+    if str(span.contents[-1]).find("Button_disabled") > 0 or not next_page:
+        next_page = False
+    else:
+        curr_page +=1
+        next_page = True
+#end while
+
+print("\n\n ПОИСК ЗАКОНЧЕН. Результаты в файле Auto_articles.csv")
+f.close()
