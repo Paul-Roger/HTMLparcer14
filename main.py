@@ -47,7 +47,7 @@ def search_news(message):
         except:
             print("неверный формат даты, выбрана 2023-01-01 по умолчанию")
             date_str = '2023-01-01'
-    my_thread = threading.Thread(target=parser, args=(arg[0],str_startdate))
+    my_thread = threading.Thread(target=parser, args=(arg[0],str_startdate,))
     my_thread.start()
 
 @bot.message_handler(content_types=['text'])
@@ -59,4 +59,4 @@ def TextRespond(message):
 if __name__ == '__main__':
     bot.polling()
 
-
+storage.close()
