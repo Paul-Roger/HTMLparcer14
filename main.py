@@ -3,7 +3,7 @@
 # /help - shows command list and description.
 # /abort - stops current search
 # /find <keyword> <yyyy-mm-dd>- search news containing <keyword>, in articles styarting from date for example /find BMW 2023-01-01
-
+# 5980165046 #:# AAE_C4ZVVz # EEWWrImuTERmqQEQiv # CIHUQHQ
 
 #import ParserNewsAtoRu
 import telebot
@@ -12,7 +12,7 @@ from datetime import date
 import threading
 
 #Constants
-Token = "5980165046:AAE_C4ZVVzEEWWrImuTERmqQEQivCIHUQHQ"
+Token = ""
 DefDateStr = "2023-01-01"
 DefSearchStr = "Mercedes"
 MaxUsers = 100 #max number of users registered
