@@ -1,7 +1,7 @@
 # Telegram bot which can find all news on news.auto.ru for "keyword" since "date"
 # Commands:
 # /help - shows command list and description.
-# /abort - stops current search
+### /abort - stops current search - не реализовано в текущей версии
 # /find <keyword> <yyyy-mm-dd>- search news containing <keyword>, in articles styarting from date for example /find BMW 2023-01-01
 
 import ParserNewsAtoRu
@@ -14,7 +14,7 @@ import threading
 import os
 
 #Constants
-Token = ""
+Token = "5980165046:AAE_C4ZVVzEEWWrImuTERmqQEQivCIHUQHQ"
 DefDateStr = "2023-02-01"
 DefSearchStr = "Mercedes"
 MaxUsers = 100 #max number of users registered
@@ -46,7 +46,7 @@ def request_list(bot, dbname):
                     userreq = storage[eldest_key]
                     parser_result = 0
                     parser_result = ParserNewsAtoRu.parser(eldest_key, userreq[0], userreq[1])
-                    print("Parser Call")
+                    #print("Parser Call")
                     if parser_result > 0:
                         bot.send_message(eldest_key, f"Thes result of your search'{userreq[0]} {userreq[1]} see in the file")
                         file_name = eldest_key + ".csv"
@@ -56,7 +56,7 @@ def request_list(bot, dbname):
                         del storage[eldest_key]
                         #delete file
                         file_name = str(eldest_key) + ".csv"
-                        #os.remove(file_name)
+                        os.remove(file_name)
                     else:
                         bot.send_message(eldest_key, "Sorry, we were unable to find anything reflecting your search conditions")
                         del storage[eldest_key]
@@ -78,11 +78,7 @@ my_thread.start()
 
 @bot.message_handler(commands=['help'])
 def register_user(message):
-    bot.send_message(message.chat.id, "Bot can find articles about cars and send result as a csv file\n /help - this information\n /start - register user before start search\n /date yyyy-mm-dd - set start date for search\n /find <keyword> - start search for a keyword\n /abort - aborts currently running search\n /end - remove registered user from the list\n ")
-
-@bot.message_handler(commands=['date'])
-def set_date(message):
-    bot.send_message(message.chat.id, "Your date has been set")
+    bot.send_message(message.chat.id, "Bot can find articles about cars and send result as a csv file\n /help - this information\n /find <keyword> - start search for a keyword\n  ")
 
 @bot.message_handler(commands=['find'])
 def search_news(message):
