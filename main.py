@@ -3,7 +3,6 @@
 # /help - shows command list and description.
 # /abort - stops current search
 # /find <keyword> <yyyy-mm-dd>- search news containing <keyword>, in articles styarting from date for example /find BMW 2023-01-01
-# 5980165046 #:# AAE_C4ZVVz # EEWWrImuTERmqQEQiv # CIHUQHQ
 
 import ParserNewsAtoRu
 import telebot
@@ -46,7 +45,7 @@ def request_list(bot, dbname):
                     #request data from parser
                     userreq = storage[eldest_key]
                     parser_result = 0
-                    #parser_result = ParserNewsAtoRu.parser(eldest_key, userreq[0], userreq[1])
+                    parser_result = ParserNewsAtoRu.parser(eldest_key, userreq[0], userreq[1])
                     print("Parser Call")
                     if parser_result > 0:
                         bot.send_message(eldest_key, f"Thes result of your search'{userreq[0]} {userreq[1]} see in the file")
@@ -57,7 +56,7 @@ def request_list(bot, dbname):
                         del storage[eldest_key]
                         #delete file
                         file_name = str(eldest_key) + ".csv"
-                        os.remove(file_name)
+                        #os.remove(file_name)
                     else:
                         bot.send_message(eldest_key, "Sorry, we were unable to find anything reflecting your search conditions")
                         del storage[eldest_key]
@@ -66,8 +65,6 @@ def request_list(bot, dbname):
 #request_list(bot) end
 
 # def request_list end
-
-req_list = []
 
 #open storage (or create if not exist)
 #list format: {<UserID>,[<Date>, <keyword>, <QueNo>] where data = yyyy-mm-dd, keyword = search string, QueNo = -1 (initial), or 0 - current active or 1...99 - number in queue
@@ -111,6 +108,7 @@ def search_news(message):
             except:
                 print(f"неверный формат даты, выбрана {DefDateStr} по умолчанию")
                 str_startdate = DefDateStr
+        req_list = []   #req_list = [<Search string>, <Begin date>, <request date/time>]
         req_list.append(arg[0])
         req_list.append(str_startdate)
         str_time = datetime.now().strftime('%m-%d-%Y %H:%M:%S')

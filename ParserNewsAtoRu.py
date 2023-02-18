@@ -9,20 +9,21 @@ from datetime import date
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
 
-def parser(str_keyword, str_startdate, bot, chat_id):
+def parser(filename, search_str, date_str):
     disable_warnings(InsecureRequestWarning)
     url_base="https://mag.auto.ru/theme/news/?page="
     curr_page = 1
-
-    search_str = input("ключевое слово для поиска: ")
-    date_str = input("самая ранняя дата YYYY+MM+DD: ")
-    try:
-        dt_startdate = date.fromisoformat(date_str)
-    except:
-        print("неверный формат даты, выбрана 2023-01-01 по умолчанию")
-        date_str = '2023-01-01'
-        dt_startdate = date.fromisoformat(date_str)
+    file_name = filename+".csv"
+    #search_str = input("ключевое слово для поиска: ")
+    #date_str = input("самая ранняя дата YYYY+MM+DD: ")
+    #try:
+    #    dt_startdate = date.fromisoformat(date_str)
+    #except:
+    #    print("неверный формат даты, выбрана 2023-01-01 по умолчанию")
+    #    date_str = '2023-01-01'
+    #    dt_startdate = date.fromisoformat(date_str)
     #print(dt_startdate)
+    dt_startdate = date.fromisoformat(date_str)
 
     next_page = True
     headers = {
@@ -45,7 +46,7 @@ def parser(str_keyword, str_startdate, bot, chat_id):
     }
 
     #open CSV file
-    f = open('Auto_articles.csv', 'w', encoding='utf-8-sig', newline='') #, encoding="utf-8'
+    f = open(file_name, 'w', encoding='utf-8-sig', newline='') #, encoding="utf-8'
     writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC, delimiter=';')
     file_row = ["Заголовок", "Дата", "Ссылка", "Начало статьи"]
     writer.writerow(file_row)
@@ -114,7 +115,7 @@ def parser(str_keyword, str_startdate, bot, chat_id):
             next_page = True
     #end while
 
-    print("\n\n ПОИСК ЗАКОНЧЕН. Результаты в файле Auto_articles.csv")
-    bot.send_message(chat_id, "This is what we have found for your request")
+    print("\n\n ПОИСК ЗАКОНЧЕН. Результаты в файле " + file_name)
 
     f.close()
+    return(1)
