@@ -27,7 +27,7 @@ def request_list(bot, dbname):
         with shelve.open(dbname) as storage:
             print(list(storage.keys()))
             if len(list(storage.keys())) > 0: #list is not empty, find the eldest
-                print("if len()")
+                print("if len()", )
                 with shelve.open(dbname) as storage:
                     print("with shelve")
                     eldest_key = ""
@@ -53,6 +53,7 @@ def request_list(bot, dbname):
                         with open(file_name, 'r', encoding='utf-8') as data:
                              bot.send_document(eldest_key, data)
                         #remove request from the list
+                        print(eldest_key)
                         del storage[eldest_key]
                         #delete file
                         file_name = str(eldest_key) + ".csv"
