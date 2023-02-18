@@ -14,7 +14,7 @@ import threading
 import os
 
 #Constants
-Token = "5980165046:AAE_C4ZVVzEEWWrImuTERmqQEQivCIHUQHQ"
+Token = ""
 DefDateStr = "2023-02-01"
 DefSearchStr = "Mercedes"
 MaxUsers = 100 #max number of users registered
